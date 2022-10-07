@@ -1,0 +1,14 @@
+﻿DefaultApp --> IncubatorApi
+DefaultProject in Package Manager --> DataAccess
+
+Adding migration:
+Change default project to data from Package manager console then run the command:
+Add-Migration [MigrationName] -c [ContextName]
+
+Updating database:
+update-database -c [ContextName]
+
+
+reverting an update:
+update-database [MigrationFileName] -c [ContextName]
+Remove-Migration
