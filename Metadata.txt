@@ -1,0 +1,15 @@
+Accounts in DataBase
+	password:Pa$$w0rd
+Admin:
+	mail:admin@mail.com
+Vendor:
+	mail:vendor1@mail.com
+	mail:vendor2@mail.com
+Client:
+	mail:client1@mail.com
+	mail:client2@mail.com
+	mail:client3@mail.com
+
+Products ==> 135 product
+Brands ==> 10 brand
+Categories==> 11 category

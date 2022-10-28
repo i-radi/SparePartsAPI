@@ -1,14 +1,5 @@
-using AutoMapper;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using SpareParts.API.Services.Auth;
-using SpareParts.Data.Models;
-using SpareParts.Domain.Dtos.IdentityDtos;
-using SpareParts.Domain.Dtos.Jwt;
-using SpareParts.Domain.Dtos.UserDtos;
-using SpareParts.Domain.Repos;
-using SpareParts.InfraStructure.Enums;
-using SpareParts.InfraStructure.Interfaces;
+﻿
+using System.Security.Claims;
 
 namespace SpareParts.API.Controllers;
 
@@ -16,28 +7,20 @@ namespace SpareParts.API.Controllers;
 [ApiController]
 public class UsersController : ControllerBase
 {
+    private readonly UserManager<User> _userManager;
+    private readonly IAuthService _authService;
     private readonly IMapper _mapper;
 
-    private readonly IAuthService _authService;
-
-    private readonly UserRepo _repo;
-
-    private readonly UserManager<User> _userManager;
-
-    public UsersController(UserManager<User> userManager,
+    public UsersController(
+        UserManager<User> userManager,
         IAuthService authService,
-        UserRepo repo,
         IMapper mapper)
     {
         _userManager = userManager;
         _authService = authService;
-        _repo = repo;
         _mapper = mapper;
     }
 
-    
-
-    //[Authorize(Roles = "Advisor")]
     [HttpPost("register")]
     public async Task<IActionResult> RegisterAsync(RegisterDto dto)
     {
@@ -52,13 +35,54 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("login")]//token  
-    public async Task<IActionResult> GetTokenAsync([FromBody] TokenRequestDto model)
+    [HttpPost("login")] 
+    public async Task<IActionResult> GetTokenAsync(LoginDto model)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var result = await _authService.GetTokenAsync(model);
+        var result = await _authService.LoginAsync(model);
+
+        if (!result.IsAuthenticated)
+            return BadRequest(result.Message);
+
+        return Ok(result);
+    }
+    
+    [HttpGet]
+    [Authorize(Policy = "Manager")]
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetAll()
+    {
+        var modelItems = await _userManager.Users.ToListAsync();
+        IEnumerable<UserDto> result = _mapper.Map<IEnumerable<UserDto>>(modelItems);
+        foreach (var userDto in result.Select((value, i) => new { i, value }))
+        {
+           userDto.value.Role = (await _userManager.GetClaimsAsync(modelItems[userDto.i])).FirstOrDefault(c=>c.Type==ClaimTypes.Role)!.Value;
+        }
+        return Ok(result);
+    }
+
+    [HttpGet("id")]
+    public async Task<ActionResult<UserDto>> GetById(Guid id)
+    {
+        var modelItem = await _userManager.FindByIdAsync(id.ToString());
+        UserDto result = _mapper.Map<UserDto>(modelItem);
+        result.Role = (await _userManager.GetClaimsAsync(modelItem)).FirstOrDefault(c => c.Type == ClaimTypes.Role)!.Value;
+        return Ok(result);
+    }
+    
+    [HttpPut]
+    public async Task<ActionResult> UpdateAsync(Guid id, UpdateUserDto dto)
+    {
+        if (id != dto.Id)
+        {
+            return BadRequest("Id not matched");
+        }
+
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var result = await _authService.UpdateUserAsync(dto);
 
         if (!result.IsAuthenticated)
             return BadRequest(result.Message);
@@ -66,29 +90,8 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
 
-    //GET api/Users
-    [HttpGet]
-    public ActionResult<IEnumerable<UserReadDto>> GetAll(UserType type = UserType.None)
-    {
-        IEnumerable<User> modelItems = null;
-        if (type == UserType.None)
-            modelItems = _repo.GetAllModel();
-        else
-            modelItems = _repo.GetAllModel().Where(u => u.UserType == type);
-
-        return Ok(_mapper.Map<IEnumerable<UserReadDto>>(modelItems));
-    }
-
-    //GET api/Users/{id}
-    [HttpGet("id")]
-    public ActionResult<UserReadDto> GetSimpleUserById(Guid id)
-    {
-        var modelItem = _repo.GetById(id);
-        return Ok(_mapper.Map<UserReadDto>(modelItem));
-    }
-    
     [HttpPost("changePassword")]
-    public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordDto dto)
+    public async Task<IActionResult> ChangePasswordAsync(ChangePasswordDto dto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -100,15 +103,61 @@ public class UsersController : ControllerBase
 
         return Ok(result);
     }
-
-    //DELETE api/Users/{id}
-    [HttpDelete("{id}")]
-    public ActionResult DeleteUser(Guid id)
+    
+    [HttpPost("forgetPassword")]
+    public IActionResult ForgetPasswordAsync()
     {
-        var modelFromRepo = _repo.GetById(id);
-        _repo.DeleteModel(modelFromRepo);
-        _repo.SaveChanges();
-
-        return NoContent();
+        return Ok(new{Info="لسه متهندلتش "});
     }
+
+    [HttpDelete]
+    [Authorize(Policy = "Manager")]
+    public async Task<IActionResult> DeleteUser(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+
+        if (user == null)
+            return NotFound();
+
+        var result = await _userManager.DeleteAsync(user);
+
+        if (!result.Succeeded)
+            return BadRequest("Not Deleted");
+
+        return Ok();
+    }
+
+    #region Roles
+
+    /*[HttpPost("manageRoles")]
+    public async Task<IActionResult> ManageRoles(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+            return NotFound();
+
+        return Ok(GetRoles(userId));
+    }
+    private UserRolesDto GetRoles(string userId)
+    {
+        var user =  _userManager.FindByIdAsync(userId).Result;
+
+        var roles =  _roleManager.Roles.ToList();
+
+        return new UserRolesDto
+        {
+            UserId = user.Id,
+            UserName = user.UserName,
+            Roles = roles.Select(role => new RoleDto
+            {
+                RoleId = role.Id,
+                RoleName = role.Name,
+                IsSelected = _userManager.IsInRoleAsync(user, role.Name).Result
+            }).ToList()
+        };
+    }*/
+
+    #endregion
+
 }

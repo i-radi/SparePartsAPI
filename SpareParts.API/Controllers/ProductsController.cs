@@ -1,9 +1,5 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using SpareParts.Data.Models;
-using SpareParts.Domain.Dtos.ProductDtos;
-using SpareParts.InfraStructure.Interfaces;
+﻿
+using SpareParts.InfraStructure.Helpers;
 
 namespace SpareParts.API.Controllers;
 
@@ -11,64 +7,84 @@ namespace SpareParts.API.Controllers;
 [ApiController]
 public class ProductsController : ControllerBase
 {
-    private readonly IDomainRepository<Product> _repo;
-    private readonly IMapper _mapper;
+    private readonly UserManager<User> _userManager;
+    private readonly IProductsManager _productsManager;
 
-    public ProductsController(IDomainRepository<Product> repo, IMapper mapper)
+    public ProductsController(UserManager<User> userManager, IProductsManager productsManager)
     {
-        _repo = repo;
-        _mapper = mapper;
+        _userManager = userManager;
+        _productsManager = productsManager;
     }
-    //GET api/Products
+
     [HttpGet]
-    public ActionResult<IEnumerable<ProductReadDto>> GetAllProduct()
+    public ActionResult<IEnumerable<SimpleProductDto>> GetAll()
     {
-        var modelItems = _repo.GetAllModel();
-
-        return Ok(_mapper.Map<IEnumerable<ProductReadDto>>(modelItems));
+        return Ok(_productsManager.GetAll());
     }
 
-    //GET api/Products/{id}
+    [HttpGet("ownProduct")]
+    [Authorize(Policy = "Vendor")]
+    public async Task<ActionResult<IEnumerable<ReadProductDto>>> GetAllOwn()
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+        return Ok(_productsManager.GetAllOwn(currentUser.Id));
+    }
+
+    [HttpGet("withPagination")]
+    public ActionResult<IEnumerable<SimpleProductDto>> GetAllWithPagination(int pageNumber,int productsPerPage)
+    {
+        var result = PaginatedList<SimpleProductDto>.Create(_productsManager.GetAll(), pageNumber, productsPerPage);
+        return Ok(result);
+    }
+
     [HttpGet("{id}")]
-    public ActionResult<ProductReadDto> GetProductById(int id)
+    public ActionResult<ReadProductDto> GetProductById(Guid id)
     {
-        var modelItem = _repo.GetById(id);
-        return Ok(_mapper.Map<ProductReadDto>(modelItem));
+        var dto = _productsManager.GetById(id);
+        if (dto is null)
+            return BadRequest("Not Found Product");
+        return Ok(dto);
     }
 
-    //POST api/Products/
+    [HttpGet]
+    [Route("Count")]
+    public ActionResult<int> GetCountProduct()
+    {
+        return Ok(_productsManager.GetAll().Count);
+    }
+
     [HttpPost]
-    public ActionResult<ProductReadDto> CreateProduct(ProductCreateDto createDto)
+    [Authorize(Policy = "Vendor")]
+    public async Task<ActionResult<ReadProductDto>> CreateProduct(AddProductDto dto)
     {
-        var model = _mapper.Map<Product>(createDto);
-        _repo.CreateModel(model);
-        _repo.SaveChanges();
-
-        return Ok(_mapper.Map<ProductReadDto>(model));
+        var currentUser = await _userManager.GetUserAsync(User);
+        return Ok(_productsManager.Add(dto, currentUser));
     }
 
-    //PUT api/Products/{id}
     [HttpPut("{id}")]
-    public ActionResult UpdateProduct(int id, ProductUpdateDto updateDto)
+    [Authorize(Policy = "Vendor")]
+    public ActionResult UpdateProduct(Guid id, UpdateProductDto dto)
     {
-        var modelFromRepo = _repo.GetById(id);
-        _mapper.Map(updateDto, modelFromRepo);
-
-        _repo.UpdateModel(modelFromRepo);
-
-        _repo.SaveChanges();
+        if (id != dto.Id)
+        {
+            return BadRequest("Id not matched");
+        }
+        if (!_productsManager.Update(dto))
+        {
+            return BadRequest("Not Updated");
+        }
 
         return NoContent();
     }
     
-    //DELETE api/Products/{id}
     [HttpDelete("{id}")]
-    public ActionResult DeleteProduct(int id)
+    [Authorize(Policy = "Vendor")]
+    public ActionResult DeleteProduct(Guid id)
     {
-        var modelFromRepo = _repo.GetById(id);
-        _repo.DeleteModel(modelFromRepo);
-        _repo.SaveChanges();
-
+        if (!_productsManager.Delete(id))
+        {
+            return BadRequest("Not Deleted");
+        }
         return NoContent();
     }
     

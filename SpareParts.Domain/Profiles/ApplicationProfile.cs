@@ -1,11 +1,7 @@
 ﻿using AutoMapper;
-using SpareParts.Domain.Dtos.IdentityDtos;
-using SpareParts.Domain.Dtos.OrderDtos;
-using SpareParts.Domain.Dtos.OrderItemDtos;
-using SpareParts.Domain.Dtos.ProductDtos;
-using SpareParts.Domain.Dtos.UserDtos;
+using SpareParts.Data;
 
-namespace SpareParts.Domain.Profiles
+namespace SpareParts.Domain
 {
     public class ApplicationProfile : Profile
     {
@@ -13,19 +9,22 @@ namespace SpareParts.Domain.Profiles
         {
             //Source -> Target
             CreateMap<RegisterDto, User>();
-            CreateMap<User, UserReadDto>();
+            CreateMap<User, UserDto>().ReverseMap();
 
-            CreateMap<Product, ProductReadDto>();
-            CreateMap<OrderItem, OrderItemReadDto>();
-            CreateMap<OrderItem, OrderReadDto>();
+            CreateMap<Product, AddProductDto>().ReverseMap();
+            CreateMap<Product, ReadProductDto>().ReverseMap();
+            CreateMap<Product, SimpleProductDto>().ReverseMap();
+            CreateMap<Product, UpdateProductDto>().ReverseMap();
 
-            CreateMap<ProductUpdateDto,Product>();
-            CreateMap<OrderItemUpdateDto, OrderItem>();
-            CreateMap<OrderItemUpdateDto, OrderItem>();
+            CreateMap<Brand, AddBrandDto>().ReverseMap();
+            CreateMap<Brand, ReadBrandDto>().ReverseMap();
+            CreateMap<Brand, UpdateBrandDto>().ReverseMap();
 
-            CreateMap<ProductCreateDto, Product>();
-            CreateMap<OrderItemCreateDto, OrderItem>();
-            CreateMap<OrderItemCreateDto, OrderItem>();
+            CreateMap<Category, AddCategoryDto>().ReverseMap();
+            CreateMap<Category, ReadCategoryDto>().ReverseMap();
+            CreateMap<Category, UpdateCategoryDto>().ReverseMap();
+
+            CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿namespace SpareParts.Domain.Dtos.IdentityDtos
+﻿namespace SpareParts.Domain
 {
-    public class ChangePasswordDto : IDto
+    public class ChangePasswordDto : IDtos
     {
         public ChangePasswordDto(Guid id, string password, string newPassword)
         {
@@ -9,7 +9,7 @@
             NewPassword = newPassword;
         }
 
-        public Guid Id { get; set; }
+        public Guid Id { get;}
 
         [Required, StringLength(256)]
         public string Password { get; }

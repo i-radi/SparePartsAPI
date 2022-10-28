@@ -1,0 +1,47 @@
+[
+  {
+    "Id": 0,
+    "Name": "ExternalParts"
+  },
+  {
+    "Id": 0,
+    "Name": "Filters"
+  },
+  {
+    "Id": 0,
+    "Name": "Belts"
+  },
+  {
+    "Id": 0,
+    "Name": "Bearings"
+  },
+  {
+    "Id": 0,
+    "Name": "ACandCoolingsystem"
+  },
+  {
+    "Id": 0,
+    "Name": "SuspensionandBrakes"
+  },
+  {
+    "Id": 0,
+    "Name": "EngineParts"
+  },
+  {
+    "Id": 0,
+    "Name": "BrakeDiscs"
+  },
+  {
+    "Id": 0,
+    "Name": "ShockAbsorber"
+  },
+  {
+    "Id": 0,
+    "Name": "WiperBlade"
+  },
+  {
+    "Id": 0,
+    "Name": "Other"
+  }
+]
+    

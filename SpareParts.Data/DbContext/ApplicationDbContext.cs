@@ -1,55 +1,65 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using SpareParts.Data.Configurations;
-using SpareParts.Data.Models;
 
-namespace SpareParts.Data.DbContext;
+// ReSharper disable UnusedMember.Local
 
-public class ApplicationDbContext: IdentityDbContext<User, IdentityRole<Guid>, Guid, IdentityUserClaim<Guid>, IdentityUserRole<Guid>, IdentityUserLogin<Guid>, IdentityRoleClaim<Guid>, IdentityUserToken<Guid>>
+namespace SpareParts.Data;
+
+public class ApplicationDbContext:
+    IdentityDbContext<User, IdentityRole<Guid>, Guid, IdentityUserClaim<Guid>, IdentityUserRole<Guid>, IdentityUserLogin<Guid>, IdentityRoleClaim<Guid>, IdentityUserToken<Guid>>
 {
+    #region ctor
+    public ApplicationDbContext()
+    {
+    }
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
 
-    public DbSet<Product> Products { get; set; }
-    public DbSet<Order> Orders { get; set; }
-    public DbSet<OrderItem> OrderItems { get; set; }
-    public DbSet<Address> Addresses { get; set; }
+    #endregion
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    #region DbSet
+    public override DbSet<User> Users => Set<User>();
+    public virtual DbSet<Brand> Brands => Set<Brand>();
+    public virtual DbSet<Review> Reviews => Set<Review>();
+    public virtual DbSet<Product> Products => Set<Product>();
+    public virtual DbSet<Category> Categories => Set<Category>();
+    public virtual DbSet<CreditCard> CreditCards => Set<CreditCard>();
+    public virtual DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
+    public virtual DbSet<OrderHeader> OrderHeaders => Set<OrderHeader>();
+    public virtual DbSet<ShoppingCart> ShoppingCarts => Set<ShoppingCart>();
+
+    #endregion
+
+    #region OnConfiguring
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        base.OnModelCreating(modelBuilder);
-        var typesToRegister = GetType().Assembly
-            .GetTypes()
-            .Where(type => type.GetInterfaces()
-                .Any(i => i.IsGenericType &&
-                          i.GetGenericTypeDefinition() == typeof(IEntityTypeConfiguration<>)));
-        foreach (Type type in typesToRegister)
+        if (!optionsBuilder.IsConfigured)
         {
-            dynamic configurationInstance = Activator.CreateInstance(type)!;
-            if (configurationInstance != null)
-                modelBuilder.ApplyConfiguration(configurationInstance);
+            optionsBuilder.UseSqlServer("Data Source=.;Initial Catalog=SparePartsDB;Integrated Security=True");
         }
+    }
 
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ProductConfiguration).Assembly);
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AddressConfiguration).Assembly);
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(OrderConfiguration).Assembly);
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(OrderItemConfiguration).Assembly);
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(UserConfiguration).Assembly);
-        //modelBuilder.Entity<SparePart>();
-        //modelBuilder.Ignore<SparePart>();
-        //new UserConfiguration().Configure(modelBuilder.Entity<User>());
-        //modelBuilder.Entity<SparePart>().ToTable("SpareParts",b => b.ExcludeFromMigrations());
+    #endregion
+
+    #region OnModelCreating
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+
+        builder.ApplyConfigurationsFromAssembly(typeof(ProductConfiguration).Assembly);
+        builder.ApplyConfigurationsFromAssembly(typeof(UserConfiguration).Assembly);
 
         //Change Identity Schema and Table Names
-        modelBuilder.Entity<IdentityRole<Guid>>().ToTable("Roles", "User");
-        modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles", "User");
-        modelBuilder.Entity<IdentityUserClaim<Guid>>().ToTable("UserClaims", "User");
-        modelBuilder.Entity<IdentityUserLogin<Guid>>().ToTable("UserLogins", "User");
-        modelBuilder.Entity<IdentityRoleClaim<Guid>>().ToTable("RoleClaims", "User");
-        modelBuilder.Entity<IdentityUserToken<Guid>>().ToTable("UserTokens", "User");
-
-
+        builder.Entity<User>().ToTable("Users");
+        builder.Entity<IdentityRole<Guid>>().ToTable("Roles");
+        builder.Entity<IdentityUserRole<Guid>>().ToTable("UserRole");
+        builder.Entity<IdentityUserClaim<Guid>>().ToTable("UserClaims");
+        builder.Entity<IdentityUserLogin<Guid>>().ToTable("UserLogins");
+        builder.Entity<IdentityRoleClaim<Guid>> ().ToTable("RoleClaims");
+        builder.Entity<IdentityUserToken<Guid>>().ToTable("UserTokens");
     }
+
+    #endregion
+
 }

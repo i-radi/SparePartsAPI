@@ -1,0 +1,66 @@
+# Spare Parts EndPoints
+
+Page 1:
+    ✔1. get:Products(pageNumber, ProductsPerPage)=>list<ProductDto>
+	✔2. get:Categories()=>list<CategoryDto>
+	✔3. get:Brands()=>list<BrandDto>
+
+Page 2:
+    4. get:Products(Brand, pageNumber, ProductsPerPage)=>list<ProductDto>
+	5. get:Products(Category, pageNumber, ProductsPerPage)=>list<ProductDto>
+	6. get:Products(MinPrice, MaxPrice, pageNumber, ProductsPerPage)=>list<ProductDto>
+
+Page 3:
+	✔7. get:Product(ProductId)=>ReadProductDto
+
+Page 4:
+	✔8. post:signup(userInfoDto)=>jwt
+
+Page 5:
+	✔9. post:Login(email, password)=>jwt
+	10. post:ForgetPassword(email)=>jwt
+
+Page 6:
+	11. post:ProductCart(jwt,userId,productId)=>ProductCartDto
+	12. get:ProductsCart(jwt,userId)=>list<ProductCartDto>
+	13. put:ProductCart(jwt,userId,productId,Count)=>ProductCartDto
+	14. post:Order(jwt,userId,list<productId>)=>OrderDto
+
+Page 7:
+	✔15. get:Products(jwt,pageNumber, ProductsPerPage)=>list<ProductDto>
+	✔16. get:Product(jwt,ProductId)=>ReadProductDto
+	✔17. post:Product(jwt,AddProductDto)=>AddProductDto
+	✔18. put:Product(jwt,UpdateProductDto)=>UpdateProductDto
+	✔19. delete:Product(jwt,productId)=>Done
+
+Page 8:
+	✔20. get:user(jwt,userId)=>userInfoDto
+	✔21. put:user(jwt,userInfoDto)=>userInfoDto
+	✔21. post:changePassword(jwt,UserId,password,newPassword)=>userInfoDto
+
+Admin:
+	✔22. get:users(jwt)=>userDto
+	✔23. delete:user(jwt,userId)=>done
+	✔24. post:Brand(jwt,BrandDto)=>BrandDto
+	✔25. put:Brand(jwt,BrandDto)=>BrandDto
+	✔26. delete:Brand(jwt,BrandDto)=>done
+	✔27. post:Category(jwt,CategoryDto)=>CategoryDto
+	✔28. put:Category(jwt,CategoryDto)=>CategoryDto
+	✔29. delete:Category(jwt,CategoryDto)=>done
+
+-------------------------------------------------------------------------------------------
+
+# Dtos
+
+1-CategoryDto:id,name,imgpath
+2-BrandDto:id,name,imgpath
+3-ProductDto:id,name,imgpath,price
+5-AddProductDto:name,imgpath,price,modelNumber,Quantity,Details,UserId,BrandId,CategoryId
+6-UpdateProductDto:name,imgpath,price,modelNumber,Quantity,Details,UserId,BrandId,CategoryId
+7-ReadProductDto:id,name,imgpath,price,modelNumber,Quantity,Details,UserId,BrandId,CategoryId
+8-ProductCartDto:id,name,imgpath,price,count
+9-OrderDto:id,price,shippingDate
+10-userDto:Name,username,email,phoneNumber,userType
+11-userInfoDto:Name,username,email,password,phoneNumber,userType
+
+
