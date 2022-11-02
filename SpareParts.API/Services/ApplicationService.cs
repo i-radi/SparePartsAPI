@@ -33,7 +33,8 @@ public static class ApplicationService
                 options.Lockout.MaxFailedAccessAttempts = 3;
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
             })
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
         #endregion
 
@@ -74,6 +75,8 @@ public static class ApplicationService
                     policy => policy.RequireClaim(ClaimTypes.Role, "Admin", "Manager", "Vendor"));
                 options.AddPolicy("Clint",
                     policy => policy.RequireClaim(ClaimTypes.Role, "Admin", "Manager", "Client"));
+                options.AddPolicy("User",
+                    policy => policy.RequireClaim(ClaimTypes.Role, "Admin", "Manager", "Client", "User"));
 
             }
         );
@@ -127,8 +130,6 @@ public static class ApplicationService
         
         services.AddScoped<IBrandRepo, BrandRepo>();
         services.AddScoped<IBrandsManager, BrandsManager>();
-        
-        services.AddTransient<IEmailSender, EmailSender>();
 
         #endregion
 

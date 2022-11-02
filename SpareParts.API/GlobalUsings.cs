@@ -8,6 +8,5 @@ global using Microsoft.AspNetCore.Identity.UI.Services;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
 global using SpareParts.API.Services.Auth;
-global using SpareParts.API.Services.Email;
 global using SpareParts.Data;
 global using SpareParts.Domain;

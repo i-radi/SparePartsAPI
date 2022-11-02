@@ -17,10 +17,8 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<SimpleProductDto>> GetAll()
-    {
-        return Ok(_productsManager.GetAll());
-    }
+    public ActionResult<IEnumerable<SimpleProductDto>> GetAll() => Ok(_productsManager.GetAll());
+    
 
     [HttpGet("ownProduct")]
     [Authorize(Policy = "Vendor")]
@@ -37,6 +35,30 @@ public class ProductsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("withBrand")]
+    public ActionResult<IEnumerable<SimpleProductDto>> GetAllWithBrand(int brandId, int pageNumber, int productsPerPage)
+    {
+        var dtos = _productsManager.GetAll().Where(p => p.BrandId == brandId);
+        var result = PaginatedList<SimpleProductDto>.Create(dtos, pageNumber, productsPerPage);
+        return Ok(result);
+    }
+
+    [HttpGet("withCategory")]
+    public ActionResult<IEnumerable<SimpleProductDto>> GetAllWithCategory(int categoryId, int pageNumber, int productsPerPage)
+    {
+        var dtos = _productsManager.GetAll().Where(p => p.CategoryId == categoryId);
+        var result = PaginatedList<SimpleProductDto>.Create(dtos, pageNumber, productsPerPage);
+        return Ok(result);
+    }
+
+    [HttpGet("withPrice")]
+    public ActionResult<IEnumerable<SimpleProductDto>> GetAllWithPrice(double minPrice, double maxPrice, int pageNumber, int productsPerPage)
+    {
+        var dtos = _productsManager.GetAll().Where(p => p.Price <= maxPrice && p.Price >= minPrice);
+        var result = PaginatedList<SimpleProductDto>.Create(dtos, pageNumber, productsPerPage);
+        return Ok(result);
+    }
+    
     [HttpGet("{id}")]
     public ActionResult<ReadProductDto> GetProductById(Guid id)
     {
@@ -50,7 +72,7 @@ public class ProductsController : ControllerBase
     [Route("Count")]
     public ActionResult<int> GetCountProduct()
     {
-        return Ok(_productsManager.GetAll().Count);
+        return Ok(_productsManager.GetAll().ToList().Count);
     }
 
     [HttpPost]

@@ -14,11 +14,11 @@ public class ProductsManager : IProductsManager
         _mapper = mapper;
     }
 
-    public List<SimpleProductDto> GetAll(string[]? include = null!)
+    public IEnumerable<SimpleProductDto> GetAll(string[]? include = null!)
     {
         var modelItems = _unitOfWork.Product.GetAll(include);
 
-        return _mapper.Map<List<SimpleProductDto>>(modelItems);
+        return _mapper.Map<IEnumerable<SimpleProductDto>>(modelItems);
     }
 
     public List<ReadProductDto> GetAllOwn(Guid userId)
