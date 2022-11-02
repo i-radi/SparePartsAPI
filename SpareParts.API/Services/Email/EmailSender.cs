@@ -1,32 +1,34 @@
-﻿using System.Net;
-using System.Net.Mail;
+﻿using System.Net.Mail;
+using System.Net;
 
-namespace SpareParts.API.Services.Email
-{
-    [AllowAnonymous]
-    public class EmailSender : IEmailSender
+namespace SpareParts.API;
+
+    public static class EmailSender
     {
 #pragma warning disable CS1998
-        public async Task SendEmailAsync(string email, string subject, string htmlMessage)
+        public static async Task SendEmailAsync(string email, string subject, string htmlMessage)
 #pragma warning restore CS1998
         {
-            var fromMail = "mh600789@outlook.com";
-            var fromPassword = "WorkWork44";
+            string fromMail = "radi.allowforall@gmail.com";
+            var fromMailAddress = new MailAddress(fromMail,"Spart Parts Application");
+            string fromPassword = "bdxlqeqidjgofwaq";
 
-            var message = new MailMessage();
-
-            message.From = new MailAddress(fromMail);
-            message.To.Add(email);
-            message.Body = $"<html><body> {htmlMessage}</body></html>";
+            MailMessage message = new MailMessage();
+            message.From = fromMailAddress;
+            message.Subject = subject;
+            message.To.Add(new MailAddress(email, "Name"));
+            message.Body = "<html><body> " + htmlMessage + " </body></html>";
             message.IsBodyHtml = true;
 
-            var smtpClient = new SmtpClient("smtp-mail.outlook.com")
+            var smtpClient = new SmtpClient("smtp.gmail.com")
             {
                 Port = 587,
-                Credentials = new NetworkCredential(fromMail, fromPassword),
+                Credentials = new NetworkCredential(fromMailAddress.Address, fromPassword),
                 EnableSsl = true,
+                UseDefaultCredentials = false,
             };
+
             smtpClient.Send(message);
         }
     }
-}
+

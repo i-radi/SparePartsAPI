@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using SpareParts.API.Services.Token;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using SpareParts.InfraStructure;
 
 namespace SpareParts.API.Services.Auth;
 
@@ -12,14 +13,18 @@ public class AuthService : IAuthService
     private readonly Jwt _jwt;
     private readonly IMapper _mapper;
     private readonly UserManager<User> _userManager;
+    private readonly ApplicationDbContext _context;
 
-    public AuthService(UserManager<User> userManager,
+    public AuthService(
+        UserManager<User> userManager,
+        ApplicationDbContext context,
         IOptions<Jwt> jwt,
         IMapper mapper)
     {
         _jwt = jwt.Value;
         _mapper = mapper;
         _userManager = userManager;
+        _context = context;
     }
 
     public async Task<AuthDto> LoginAsync(LoginDto dto)
@@ -149,6 +154,58 @@ public class AuthService : IAuthService
             Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken),
             Username = user.UserName
         };
+    }
+
+    public async Task SendPasswordResetCodeAsync(string email)
+    {
+        // Get Identity User details user user manager
+        var user = await _userManager.FindByEmailAsync(email);
+
+        // Generate password reset token
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+        // Generate OTP
+        int otp = RandomNumberGeneartor.Generate(100000, 999999);
+
+        var resetPassword = new ResetPassword()
+        {
+            Email = email,
+            OTP = otp.ToString(),
+            Token = token,
+            UserId = user.Id,
+            User = user,
+            InsertDateTimeUtc = DateTime.UtcNow
+        };
+
+        // Save data into db with OTP
+        await _context.AddAsync(resetPassword);
+        await _context.SaveChangesAsync();
+
+        // to do: Send token in email
+        await EmailSender.SendEmailAsync(email, "Reset Password OTP", "Hello "
+                                                                      + email + "<br><br>Please find the reset password token below<br><br><b>"
+                                                                      + otp + "<b><br><br>Thanks<br>oktests.com");
+    }
+    public async Task<IdentityResult> ResetPasswordAsync(ResetPasswordDto dto)
+    {
+        // Get Identity User details user user manager
+        var user = await _userManager.FindByEmailAsync(dto.Email);
+
+        // getting token from otp
+        var resetPasswordDetails = await _context.ResetPasswords
+            .Where(rp => rp.OTP == dto.OTP && rp.UserId == user.Id)
+            .OrderByDescending(rp => rp.InsertDateTimeUtc)
+            .FirstOrDefaultAsync();
+
+        // Verify if token is older than 15 minutes
+        var expirationDateTimeUtc = resetPasswordDetails!.InsertDateTimeUtc.AddMinutes(15);
+
+        if (expirationDateTimeUtc < DateTime.UtcNow)
+        {
+            return null!;
+        }
+
+        return await _userManager.ResetPasswordAsync(user, resetPasswordDetails.Token, dto.NewPassword);
     }
 
     public async Task<AuthDto> UpdateUserAsync(UpdateUserDto dto)

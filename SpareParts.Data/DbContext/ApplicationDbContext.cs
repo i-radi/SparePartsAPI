@@ -20,6 +20,7 @@ public class ApplicationDbContext:
 
     #region DbSet
     public override DbSet<User> Users => Set<User>();
+    public virtual DbSet<ResetPassword> ResetPasswords => Set<ResetPassword>();
     public virtual DbSet<Brand> Brands => Set<Brand>();
     public virtual DbSet<Review> Reviews => Set<Review>();
     public virtual DbSet<Product> Products => Set<Product>();

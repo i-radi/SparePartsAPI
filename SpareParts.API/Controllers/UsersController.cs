@@ -1,5 +1,4 @@
-﻿
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
 namespace SpareParts.API.Controllers;
 
@@ -7,16 +6,19 @@ namespace SpareParts.API.Controllers;
 [ApiController]
 public class UsersController : ControllerBase
 {
+    private readonly SignInManager<User> _signInManager;
     private readonly UserManager<User> _userManager;
     private readonly IAuthService _authService;
     private readonly IMapper _mapper;
 
     public UsersController(
+        SignInManager<User> signInManager,
         UserManager<User> userManager,
         IAuthService authService,
         IMapper mapper)
     {
         _userManager = userManager;
+        _signInManager = signInManager;
         _authService = authService;
         _mapper = mapper;
     }
@@ -104,12 +106,6 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
     
-    [HttpPost("forgetPassword")]
-    public IActionResult ForgetPasswordAsync()
-    {
-        return Ok(new{Info="لسه متهندلتش "});
-    }
-
     [HttpDelete]
     [Authorize(Policy = "Manager")]
     public async Task<IActionResult> DeleteUser(Guid userId)
@@ -127,37 +123,46 @@ public class UsersController : ControllerBase
         return Ok();
     }
 
-    #region Roles
-
-    /*[HttpPost("manageRoles")]
-    public async Task<IActionResult> ManageRoles(string userId)
+    [HttpPost]
+    [Route("logout")]
+    [Authorize]
+    public async Task<IActionResult> Logout()
     {
-        var user = await _userManager.FindByIdAsync(userId);
-
-        if (user == null)
-            return NotFound();
-
-        return Ok(GetRoles(userId));
+        await _signInManager.SignOutAsync();
+        return Ok("Logout success!");
     }
-    private UserRolesDto GetRoles(string userId)
+
+    [HttpPost]
+    [AllowAnonymous]
+    [Route("SendPasswordResetCode")]
+    public async Task<IActionResult> SendPasswordResetCode(string email)
     {
-        var user =  _userManager.FindByIdAsync(userId).Result;
-
-        var roles =  _roleManager.Roles.ToList();
-
-        return new UserRolesDto
+        if (string.IsNullOrEmpty(email))
         {
-            UserId = user.Id,
-            UserName = user.UserName,
-            Roles = roles.Select(role => new RoleDto
-            {
-                RoleId = role.Id,
-                RoleName = role.Name,
-                IsSelected = _userManager.IsInRoleAsync(user, role.Name).Result
-            }).ToList()
-        };
-    }*/
+            return BadRequest("Email should not be null or empty");
+        }
 
-    #endregion
+        await _authService.SendPasswordResetCodeAsync(email);
 
+        return Ok("Token sent successfully in email");
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    [Route("ResetPassword")]
+    public IActionResult ResetPassword(ResetPasswordDto dto)
+    {
+        if (string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.NewPassword))
+        {
+            return BadRequest("Email & New Password should not be null or empty");
+        }
+
+        var res = _authService.ResetPasswordAsync(dto);
+        if (!res.Result.Succeeded)
+        {
+            return BadRequest();
+        }
+
+        return Ok();
+    }
 }
