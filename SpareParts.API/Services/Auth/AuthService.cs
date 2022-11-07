@@ -186,6 +186,7 @@ public class AuthService : IAuthService
                                                                       + email + "<br><br>Please find the reset password token below<br><br><b>"
                                                                       + otp + "<b><br><br>Thanks<br>oktests.com");
     }
+    
     public async Task<IdentityResult> ResetPasswordAsync(ResetPasswordDto dto)
     {
         // Get Identity User details user user manager

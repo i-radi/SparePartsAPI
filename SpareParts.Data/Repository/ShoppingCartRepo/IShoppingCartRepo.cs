@@ -7,5 +7,7 @@ namespace SpareParts.Data
         int IncrementCount(ShoppingCart shoppingCart, int count);
 
         int DecrementCount(ShoppingCart shoppingCart, int count);
+
+        int ChangeCount(ShoppingCart shoppingCart, int count);
     }
 }

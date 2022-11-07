@@ -24,7 +24,15 @@ namespace SpareParts.Domain
             CreateMap<Category, ReadCategoryDto>().ReverseMap();
             CreateMap<Category, UpdateCategoryDto>().ReverseMap();
 
-            CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
+            CreateMap<ShoppingCart, UpdateShoppingCartDto>().ReverseMap();
+            CreateMap<ShoppingCart, ChangeCountShoppingCartDto>().ReverseMap();
+            CreateMap<ShoppingCart, AssignProductToCartDto>().ReverseMap();
+            CreateMap<ShoppingCart, ReadShoppingCartDto>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
+                .ForMember(dest => dest.ImgPath, opt => opt.MapFrom(src => src.Product.ImgPath))
+                .ForMember(dest => dest.ModelNumber, opt => opt.MapFrom(src => src.Product.ModelNumber))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Product.Price))
+                .ReverseMap();
         }
     }
 }

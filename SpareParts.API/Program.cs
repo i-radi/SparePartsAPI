@@ -49,11 +49,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Spare Parts v1"));
 }
 
-app.Use(async (context, next) =>
-{
-    Counter++;
-    await next(context);
-});
+//app.Use(async (context, next) =>
+//{
+//    Counter++;
+//    await next(context);
+//});
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");

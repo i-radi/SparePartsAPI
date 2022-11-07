@@ -22,5 +22,11 @@ namespace SpareParts.Data
             shoppingCart.Count += count;
             return shoppingCart.Count;
         }
+
+        public int ChangeCount(ShoppingCart shoppingCart, int count)
+        {
+            shoppingCart.Count = count;
+            return shoppingCart.Count;
+        }
     }
 }

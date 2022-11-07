@@ -16,7 +16,7 @@
 
         [ForeignKey("UserId")] public virtual User User { get; set; } = new();
 
-        [NotMapped]
-        public double Price { get; set; }
+        //[NotMapped]
+        //public double Price { get; set; }
     }
 }
