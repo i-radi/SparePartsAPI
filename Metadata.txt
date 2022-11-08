@@ -1,14 +1,14 @@
 Accounts in DataBase
-	password:Pa$$w0rd
 Admin:
-	mail:admin@mail.com
+	admin@mail.com - name:Ali
 Vendor:
-	mail:vendor1@mail.com
-	mail:vendor2@mail.com
+	vendor1@mail.com - name:Mona
+	vendor2@mail.com - name:Ahmed
 Client:
-	mail:client1@mail.com
-	mail:client2@mail.com
-	mail:client3@mail.com
+	client1@mail.com - name:Maha
+	client2@mail.com - name:Mohamed
+Password:
+	Pa$$w0rd
 
 Products ==> 135 product
 Brands ==> 10 brand
