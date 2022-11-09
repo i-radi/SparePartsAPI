@@ -25,7 +25,7 @@ public class ProductsController : ControllerBase
     public async Task<ActionResult<IEnumerable<ReadProductDto>>> GetAllOwn()
     {
         var currentUser = await _userManager.GetUserAsync(User);
-        return Ok(_productsManager.GetAllOwn(currentUser.Id));
+        return Ok(_productsManager.GetAllOwn(currentUser!.Id));
     }
 
     [HttpGet("withPagination")]
@@ -80,7 +80,7 @@ public class ProductsController : ControllerBase
     public async Task<ActionResult<ReadProductDto>> CreateProduct(AddProductDto dto)
     {
         var currentUser = await _userManager.GetUserAsync(User);
-        return Ok(_productsManager.Add(dto, currentUser));
+        return Ok(_productsManager.Add(dto, currentUser!));
     }
 
     [HttpPut("{id}")]

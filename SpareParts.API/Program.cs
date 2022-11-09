@@ -71,7 +71,7 @@ app.Run();
 
 partial class Program
 {
-    public static int Counter;
+    //public static int Counter = 0;
 }
 
 #endregion

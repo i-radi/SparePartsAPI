@@ -41,7 +41,7 @@ public class AuthService : IAuthService
 
         var jwtSecurityToken = await CreateJwtToken(user);
 
-        authModel.Email = user.Email;
+        authModel.Email = user!.Email;
         authModel.IsAuthenticated = true;
         authModel.Username = user.UserName;
         authModel.ExpiresOn = jwtSecurityToken.ValidTo;
@@ -90,7 +90,7 @@ public class AuthService : IAuthService
         var claims = new[]
             {
                 new Claim(ClaimTypes.Role, role==String.Empty?"User":role),
-                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Email, user!.Email),
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
@@ -220,7 +220,7 @@ public class AuthService : IAuthService
         if (await _userManager.FindByNameAsync(dto.Name) is not null)
             return new AuthDto { Message = "Username is already registered!" };
 
-        var user = await _userManager.FindByIdAsync(dto.Id.ToString());
+        var user = await _userManager.FindByIdAsync(dto.Id.ToString())!;
         user.Name = dto.Name;
         user.Email = dto.Email;
         user.NormalizedEmail = dto.Email.ToUpper();

@@ -69,7 +69,7 @@ public class UsersController : ControllerBase
     {
         var modelItem = await _userManager.FindByIdAsync(id.ToString());
         UserDto result = _mapper.Map<UserDto>(modelItem);
-        result.Role = (await _userManager.GetClaimsAsync(modelItem)).FirstOrDefault(c => c.Type == ClaimTypes.Role)!.Value;
+        result.Role = (await _userManager.GetClaimsAsync(modelItem!)).FirstOrDefault(c => c.Type == ClaimTypes.Role)!.Value;
         return Ok(result);
     }
     

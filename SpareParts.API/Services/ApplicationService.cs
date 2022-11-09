@@ -59,7 +59,7 @@ public static class ApplicationService
                 ValidateLifetime = true,
                 ValidIssuer = config["JWT:Issuer"],
                 ValidAudience = config["JWT:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:Key"]))
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:Key"]!))
             };
         });
 

@@ -27,7 +27,8 @@ public class ShoppingCartsManager : IShoppingCartsManager
     public async Task<UpdateShoppingCartDto> AssignProduct(AssignProductToCartDto dto)
     {
         var modelItem = _mapper.Map<ShoppingCart>(dto);
-        modelItem.User = await _userManager.FindByIdAsync(dto.UserId.ToString());
+        string? userId = dto!.UserId.ToString();
+        modelItem.User = (await _userManager.FindByIdAsync(userId!))!;
         modelItem.Product = await _unitOfWork.Product.GetAsync(dto.ProductId);
         await _unitOfWork.ShoppingCart.AddAsync(modelItem);
         _unitOfWork.Save();
