@@ -72,7 +72,18 @@ public class UsersController : ControllerBase
         result.Role = (await _userManager.GetClaimsAsync(modelItem!)).FirstOrDefault(c => c.Type == ClaimTypes.Role)!.Value;
         return Ok(result);
     }
-    
+
+    [HttpGet("OwnInfo")]
+    [Authorize]
+    public async Task<ActionResult<UserDto>> GetOwnInfo()
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+        var modelItem = await _userManager.FindByIdAsync(currentUser!.Id.ToString());
+        UserDto result = _mapper.Map<UserDto>(modelItem);
+        result.Role = (await _userManager.GetClaimsAsync(modelItem!)).FirstOrDefault(c => c.Type == ClaimTypes.Role)!.Value;
+        return Ok(result);
+    }
+
     [HttpPut]
     public async Task<ActionResult> UpdateAsync(Guid id, UpdateUserDto dto)
     {
