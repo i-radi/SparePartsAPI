@@ -5,8 +5,8 @@
 	Repository pattern, Unit of work
 	Automapper, Dtos, Fluent Validation
 	Dependency Injection, Email Services
-	Authentication, Authorization
-	JWT Bearer, Claim Based, Policy
-	Swagger, Insomnia, Dockerize App
+	Authentication, Authorization, Policy 
+	JWT Bearer, Claim Based, External Login
+	Swagger, Insomnia, and Dockerize App
 
 ## ITI Graduation Project
